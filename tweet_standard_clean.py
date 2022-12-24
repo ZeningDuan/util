@@ -18,29 +18,38 @@ def RemoveURLnEMOJI(string):
     cleanstr = p.clean(string)
     return(cleanstr)
 
+
 def RemoveShortWord(string): #remove words with one or two letters
     cleanstr = ' '.join( [w for w in string.split() if len(w)>2] )
-    return cleanstr 
+    return cleanstr
+
 
 def RemoveNonAscii(string):
     encoded_string = string.encode("ascii", "ignore")
     cleanstr = encoded_string.decode()
-    return cleanstr 
+    return cleanstr
 
-def RemovePunc(string):
-    punc = '!"$%&\'()*+,-./:;<=>?[\\]^_`{|}~@#'
-    for ele in string: 
-        if ele in punc: 
+
+def RemovePunc(string, mode = 1):
+    if mode == 1: #with @ and #
+        punc = '!"$%&\'()*+,-./:;<=>?[\\]^_`{|}~@#'
+    if mode == 0:
+        punc = '!"$%&\'()*+,-./:;<=>?[\\]^_`{|}~'
+
+    for ele in string:
+        if ele in punc:
             string = string.replace(ele, " ")
     cleanstr = string
+
     return cleanstr
+
 
 def RemoveNonalpha(string):
     cleanstr = re.sub("[^a-zA-Z]"," ", string)
     return cleanstr
 
 
-def ParseHashtag(string): 
+def ParseHashtag(string):
     def rep(m):
         s=m.group(1)
         return ' '.join(re.split(r'(?=[A-Z])', s))
@@ -48,21 +57,29 @@ def ParseHashtag(string):
     cleanstr = re.sub(r'#(\w+)', rep, string)
     return cleanstr
 
+
+def RemoveRT(string): #remove all "RT @" to "@"
+    z = lambda x:re.compile('RT @').sub('@', x, count=2).strip()
+    cleanstr = z(string)
+    return(cleanstr)
+
+
 def RemoveMention(string):
     cleanstr = re.sub("@[A-Za-z0-9_]+","", string)
     return cleanstr
 
 
 def RemoveWhiteSpace(string):
-    newstr = string.strip()  
+    newstr = string.strip()
     cleanstr = re.sub(" +", " ",newstr)
-    return cleanstr 
+    return cleanstr
+
 
 def RemoveSeparator(string):
     cleanstr = string.replace('\n','')
     cleanstr = cleanstr.replace('\t','')
-    
-    return cleanstr 
+
+    return cleanstr
 
 
 def lowercase(string):
@@ -77,6 +94,7 @@ def gettoken(string) -> list:
     #clean_ls = list(tokenize(string))
     return clean_ls
 
+
 #**
 def give_emoji_free_text(text):#Remove Emoji
     return emoji.get_emoji_regexp().sub("", text)
@@ -87,7 +105,8 @@ def Preprocess(string):
     newstr = RemoveURLnEMOJI(string)
     newstr = RemoveShortWord(newstr)
     newstr = RemoveNonAscii(newstr)
-    newstr = RemovePunc(newstr)
+    newstr = RemoveRT(newstr)
+    newstr = RemovePunc(newstr, mode = 1)
     newstr = RemoveNonalpha(newstr)
     newstr = ParseHashtag(newstr)
     newstr = RemoveMention(newstr)
@@ -96,4 +115,3 @@ def Preprocess(string):
     newstr = lowercase(newstr)
     clean_ls = gettoken(newstr)
     return clean_ls
-
